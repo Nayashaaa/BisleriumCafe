@@ -1,0 +1,71 @@
+﻿@page "/example-page"
+
+<style>
+    .top-roww {
+        background-color: #8b9b86; /* Background color */
+        color: #eef0ec; /* Text color */
+        padding: 15px; /* Add padding for better spacing */
+    }
+
+    .nav-scrollable {
+        min-height: 100%;
+        background-color: #795548; /* Background color */
+        color: #eef0ec; /* Text color */
+        padding: 15px; /* Add padding for better spacing */
+    }
+
+    .nav-link {
+        /* color: #3a2c1d ;  *//* Button color */
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+</style>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3"><h5 class="text-light">Welcome <strong>@Username</strong>!</h5></div>
+        @if (UserRole == Role.Staff)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="order">
+                    <span class="oi oi-list-rich" /> Order
+                </NavLink>
+            </div>
+        }
+        @if (UserRole == Role.Admin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="users">
+                    <span class="oi oi-person" /> Users
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="item">
+                    <span class="oi oi-person" /> Items
+                </NavLink>
+            </div>
+        }
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="sales">
+                <span class="oi oi-person" /> Sales 
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link text-danger" role="button" @onclick="LogoutHandler">
+                <span class="oi oi-account-logout" /> Logout
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    [Parameter]
+    public string Username { get; set; }
+    [Parameter]
+    public Role UserRole { get; set; }
+    [Parameter]
+    public EventCallback LogoutHandler { get; set; }
+}

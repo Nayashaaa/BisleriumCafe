@@ -1,0 +1,150 @@
+﻿@page "/login"
+@inject NavigationManager NavManager
+
+<style>
+    
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #EBE0CC;
+        margin: 0;
+    }
+
+    .login-body {
+        display: flex;
+        background-color: #EBE0CC;
+        justify-content: center;
+        align-items: center;
+        min-height: 95vh;
+        border-radius: 10px;
+    }
+
+    .form-login {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #652614;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        width: 350px;
+    }
+
+    .form-floating input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-bottom: 2px solid #652614;
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #652614;
+        transition: border-bottom-color 0.3s ease;
+        outline: none;
+    }
+
+        .form-floating input:focus,
+        .form-floating textarea:focus,
+        .form-floating select:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+    .form-floating label {
+        display: block;
+        margin-bottom: 5px;
+        color: #795548;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 12px;
+        background-color: #652614;
+        border: none;
+        color: #EBE0CC;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        outline: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #4e342e;
+        }
+
+        .btn-primary:focus,
+        .btn-primary:active {
+            outline: none;
+            box-shadow: none;
+        }
+
+</style>
+<body>
+    <div class="login-body">
+        <div class="form-login">
+            <form class="text-center" @onsubmit="LoginHandler">
+                <img class="mb-4" src="/appicon.png" alt="" height="72">
+                <h1 class="h3 mb-3 fw-normal">Please Login</h1>
+                @if (_showDefaultCredentials)
+                {
+                    <div class="alert alert-info" role="alert">
+                        Username: <strong>@UserService.seedUsername</strong><br />
+                        Password: <strong>@UserService.seedPassword</strong>
+                    </div>
+                }
+
+                <div class="form-floating">
+                    <input type="text" class="form-control username" @bind="_username" placeholder="Username" />
+                    <label for="floatingInput">Username</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control password" @bind="_password" placeholder="Password" />
+                    <label for="floatingPassword">Password</label>
+                </div>
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <AlertMessage Type="danger" Message="@_errorMessage" />
+                }
+                <button class="w-100 btn btn-lg btn-primary" type="submit">
+                    <span class="oi oi-account-login"></span> Login
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+
+
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private bool _showDefaultCredentials { get; set; }
+    private string _username { get; set; }
+    private string _password { get; set; }
+    private string _errorMessage = "";
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            var user = UserService.LogIn(UserService.seedUsername, UserService.seedPassword);
+        }
+        catch { }
+
+        _globalState.CurrentUser = null;
+        _errorMessage = "";
+    }
+
+    private void LoginHandler()
+    {
+        try
+        {
+            _errorMessage = "";
+            _globalState.CurrentUser = UserService.LogIn(_username, _password);
+            if (_globalState.CurrentUser != null)
+            {
+                NavManager.NavigateTo("/");
+            }
+        }
+        catch (Exception e)
+        {
+            _errorMessage = e.Message;
+            Console.WriteLine(e);
+        }
+    }
+}

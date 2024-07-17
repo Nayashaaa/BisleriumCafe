@@ -1,0 +1,122 @@
+﻿@page "/sales"
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div style="position: absolute; width: 81%; height: 90vh; backdrop-filter: blur(5px); z-index: 10;">
+        <div class="success-message">
+            <p>@successMessage</p>
+            <div >
+                <button style="margin-left: 100px; border-radius:10px; margin-top: 20px; border: none;box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5); background-color: #652614;color: #EBE0CC;height: 35px; " @onclick="CloseSuccessPopup">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+}
+<div style="text-align:center;">
+    <h3 >All Orders</h3>
+</div>
+
+<div class="pdf-generator-container">
+    <label class="pdf-generator-label" for="datepicker">Select Date:</label>
+    <input id="datepicker" type="date" @bind="selectedDate" />
+    <button class="pdf-generator-button" @onclick="GenerateDailyPDF">Generate Daily PDF</button>
+    <button class="pdf-generator-button" @onclick="GenerateMonthlyPDF">Generate Monthly PDF</button>
+</div>
+
+ <div class="main_div">
+@if (transactions != null && transactions.Any())
+{
+
+        <table class="table">
+            <thead style="height:40px; background-color: #795548;color:#EBE0CC;">
+                <tr>
+                    <th>Transaction ID</th>
+                    <th style="text-align: left">Items</th>
+                    <th>Member ID</th>
+                    <th>Sales Date</th>
+                    <th>Order Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int sn = 1;
+                }
+                @foreach (var transaction in transactions)
+                {
+                    <tr>
+                        <td>@sn</td>
+                        <td style="text-align: left">
+                            @{
+                                for (int i = 0; i < transaction.Items.Count; i++)
+                                {
+                                    <p>@transaction.Items[i].itemName -  @transaction.ItemCount[i]</p>
+                                }
+                            }
+                        </td>
+                        <td>@transaction.MemberId</td>
+                        <td>@transaction.SalesDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>Rs. @transaction.OrderTotal</td>
+                    </tr>
+                    sn++;
+                }
+            </tbody>
+        </table>
+
+    
+    
+}
+else
+{
+    <p>No orders available.</p>
+}
+</div>
+
+@code {
+    List<Transaction> transactions;
+    DateTime selectedDate;
+    string successMessage;
+    string pdfLink;
+
+    protected override void OnInitialized()
+    {
+        selectedDate = DateTime.Now;
+        transactions = TransactionService.GetTransaction();
+    }
+
+    private async Task GenerateDailyPDF()
+    {
+        if (selectedDate != default)
+        {
+            var formattedDate = selectedDate.ToString("yyyy-MM-dd");
+            var outputPath = $"DailySalesReport_{formattedDate}.pdf";
+
+            ReportService.GenerateDailySalesPDF(selectedDate, outputPath);
+
+            successMessage = "Daily PDF generated successfully!";
+            pdfLink = outputPath;
+        }
+    }
+
+    private async Task GenerateMonthlyPDF()
+    {
+        if (selectedDate != default)
+        {
+            var selectedMonth = selectedDate.Month;
+            var selectedYear = selectedDate.Year;
+            var outputPath = $"MonthlySalesReport_{selectedMonth}_{selectedYear}.pdf";
+
+            ReportService.GenerateMonthlySalesPDF(selectedMonth, outputPath, selectedYear);
+
+            successMessage = "Monthly PDF generated successfully!";
+            pdfLink = outputPath;
+        }
+    }
+
+    private void CloseSuccessPopup()
+    {
+        successMessage = null;
+        pdfLink = null;
+    }
+
+   
+}

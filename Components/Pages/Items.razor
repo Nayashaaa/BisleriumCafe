@@ -1,0 +1,221 @@
+﻿@page "/item"
+
+<nav class="navbar navbar-light custom-navbar">
+    <h1 class="navbar-brand mb-0 h1" style="font-weight: bold; color: #795548;">
+        ITEMS
+    </h1>
+    <button class="add-btn" type="button" @onclick="OpenAddItemDialog">
+        <span class="oi oi-plus" /> Add
+    </button>
+</nav>
+<div class="table-div">
+    <table class="table custom-table">
+        <thead style="background-color:#795548;color:#EBE0CC;">
+            <tr >
+                <th>Item Name</th>
+                <th>Item Type</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _items)
+            {
+                <tr>
+                    <td style="text-align:left; padding-left: 25px;">@item.itemName</td>
+                    <td>@item.itemType</td>
+                    <td>Rs.@item.itemPrice.ToString()</td>
+                    <td>
+                        <button class="btn btn-outline-primary" type="button" @onclick="() => OpenEditItemDialog(item)">
+                            <span class="oi oi-pencil" /> Edit
+                        </button>
+                        <button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteItemDialog(item)">
+                            <span class="oi oi-delete" /> Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@if (_showAddItemDialog)
+{
+    <ModalDialog Title="Add Items" OnClose="@OnAddItemDialogClose" OkLabel="Add">
+        <form>
+            <div class="form-floating">
+                <input type="text" class="form-control username" @bind="_iName" placeholder="Item name" />
+                <label for="floatingInput">ItemName</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control username" @bind="_iPrice" placeholder="Price" />
+                <label for="floatingInput">Price</label>
+            </div>
+            <div class="form-check">
+                <input id="itemType" type="radio" class="form-check-input" name="type" value="@ItemType.Item"
+                       @onchange="TypeChangeHandler" checked="@(_types == ItemType.Item)">
+                <label class="form-check-label" for="userRole">@ItemType.Item</label>
+            </div>
+            <div class="form-check">
+                <input id="adminRole" type="radio" class="form-check-input" name="type" value="@ItemType.AddIn"
+                       @onchange="TypeChangeHandler" checked="@(_types == ItemType.AddIn)">
+                <label class="form-check-label" for="adminRole">@ItemType.AddIn</label>
+            </div>
+            @if (!string.IsNullOrEmpty(_addItemErrorMessage))
+            {
+                <AlertMessage Type="danger" Message="@_addItemErrorMessage" />
+            }
+        </form>
+    </ModalDialog>
+}
+
+@if (_showEditItemDialog)
+{
+    <ModalDialog Title="Edit Item" OnClose="@OnEditItemDialogClose" OkLabel="Save">
+        <form>
+            <div class="form-floating">
+                <input type="text" class="form-control username" @bind="_editItem.itemName" placeholder="Item Name" disabled />
+                <label for="floatingInput">Item Name</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control username" @bind="_editItem.itemPrice" placeholder="Price" />
+                <label for="floatingInput">Price</label>
+            </div>
+            @if (!string.IsNullOrEmpty(_editItemErrorMessage))
+            {
+                <AlertMessage Type="danger" Message="@_editItemErrorMessage" />
+            }
+        </form>
+    </ModalDialog>
+}
+
+
+@if (_showDeleteItemDialog)
+{
+    <ModalDialog Title="Delete User" OnClose="@OnDeleteItemDialogClose" OkLabel="Confirm">
+        <p>Are you sure you want to delete <strong>@_deleteItem.itemName</strong> item and its data?</p>
+        @if (!string.IsNullOrEmpty(_deleteItemErrorMessage))
+        {
+            <AlertMessage Type="danger" Message="@_deleteItemErrorMessage" />
+        }
+    </ModalDialog>
+}
+
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private List<Models.Item> _items { get; set; }
+    private bool _showAddItemDialog { get; set; }
+    private bool _showDeleteItemDialog { get; set; }
+    private string _iName { get; set; }
+    private float _iPrice { get; set; }
+    private string _addItemErrorMessage { get; set; }
+    private string _deleteItemErrorMessage { get; set; }
+    private Item _deleteItem { get; set; }
+    private Item _editItem { get; set; }
+    private bool _showEditItemDialog { get; set; }
+    private string _editItemErrorMessage { get; set; }
+    private ItemType _types { get; set; }
+
+    private void OpenEditItemDialog(Item item)
+    {
+        _editItem = item;
+        _showEditItemDialog = true;
+    }
+
+    private void OnEditItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+            _showEditItemDialog = false;
+            _items = ItemService.GetItem();
+            foreach (var item in _items)
+            {
+                _editItem.itemPrice = item.itemPrice;
+            }
+
+        }
+        else
+        {
+            try
+            {
+                _editItemErrorMessage = "";
+                ItemService.UpdatePrice(_editItem.itemName, _editItem.itemPrice);
+                _showEditItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _editItemErrorMessage = e.Message;
+            }
+        }
+    }
+    protected override void OnInitialized()
+    {
+        _items = ItemService.GetItem();
+    }
+
+    private void OpenAddItemDialog()
+    {
+        _showAddItemDialog = true;
+        _iName = "";
+        _iPrice = 0.0f;
+    }
+    private void OnAddItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+
+            _showAddItemDialog = false;
+        }
+        else
+        {
+            try
+            {
+                _addItemErrorMessage = "";
+                _items = ItemService.AddItem(_iName, _iPrice, _types);
+                _showAddItemDialog = false;
+            }
+            catch (Exception e)
+            {
+                _addItemErrorMessage = e.Message;
+            }
+        }
+    }
+    private void OpenDeleteItemDialog(Item item)
+    {
+        _deleteItem = item;
+        _showDeleteItemDialog = true;
+    }
+
+
+    private void OnDeleteItemDialogClose(bool isCancel)
+    {
+        if (isCancel)
+        {
+
+            _showDeleteItemDialog = false;
+            _deleteItem = null;
+        }
+        else
+        {
+            try
+            {
+                _deleteItemErrorMessage = "";
+                _items = ItemService.DeleteItem(_deleteItem.itemName);
+                _showDeleteItemDialog = false;
+                _deleteItem = null;
+            }
+            catch (Exception e)
+            {
+                _deleteItemErrorMessage = e.Message;
+            }
+        }
+    }
+
+    private void TypeChangeHandler(ChangeEventArgs e)
+    {
+        _types = (ItemType)Enum.Parse(typeof(ItemType), e.Value.ToString());
+    }
+}

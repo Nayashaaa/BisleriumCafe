@@ -1,0 +1,68 @@
+﻿table {
+    border: 0.5px solid #76453B;
+}
+.table th, td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.main_div {
+    max-width: 80%;
+    margin: 0 auto;
+    border: solid;
+    border-radius: 10px;
+    overflow:hidden;
+}
+
+.success-message{
+    border: 2px solid black;
+    margin: 350px 40%;
+    width: 300px;
+    height: 150px;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: antiquewhite;
+}
+
+.pdf-generator-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px auto;
+    background-color: #F3ECE0;
+    height: 10vh;
+    border-radius: 10px;
+    max-width: 60%;
+    padding: 0 30px;
+}
+
+/* Label styling */
+.pdf-generator-label {
+    font-size: 16px;
+}
+
+/* Date input styling */
+#datepicker {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 50px;
+}
+
+/* Button styling */
+.pdf-generator-button {
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: #795548;
+    border-radius: 4px;
+    border: none;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5);
+    color: #EBE0CC;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .pdf-generator-button:hover {
+        background-color: #86aab7;
+    }
